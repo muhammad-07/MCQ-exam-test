@@ -14,7 +14,13 @@ class CandidateController extends Controller
             'email' => 'required|email',
         ]);
 
-        $candidate = Candidate::create($validatedData);
+
+        $candidate = Candidate::firstOrCreate(
+            $validatedData
+            // ['email' =>  request('email')],
+            // ['name' => request('name')]
+        );
+        // $candidate = Candidate::create($validatedData);
 
         return redirect()->route('exam.start', ['candidate' => $candidate->id]);
     }

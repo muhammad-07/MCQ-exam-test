@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ExamController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,3 +21,11 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::get('/exam', [ExamController::class, 'index']);
+Route::post('/exam/start/', [ExamController::class, 'start'])->name('start.exam');
+Route::get('/exam/question/{id}', [ExamController::class, 'question'])->name('exam.question');
+Route::post('/exam/answer', [ExamController::class, 'answer'])->name('exam.answer');
+Route::get('/exam/result', [ExamController::class, 'result'])->name('exam.result');
+Route::get('/exam/finish', [ExamController::class, 'finish'])->name('exam.finish');
+Route::get('/exam/reopen', [ExamController::class, 'reopen'])->name('exam.reopen');
