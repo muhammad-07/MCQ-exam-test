@@ -13,7 +13,7 @@ use function PHPUnit\Framework\isNull;
 
 class ExamController extends Controller
 {
-    
+
     public function start(Request $request, Candidate $candidate)
     {
 
@@ -39,10 +39,11 @@ class ExamController extends Controller
         $question = Question::whereNotIn('id', function ($query) use ($candidate) {
             $query->select('question_id')->from('exams')->where('candidate_id', $candidate->id);
         })->inRandomOrder()->first();
+        // var_dump($question);
+        // echo $questionNumber . " " .$totalQuestions;
+        // print_r($question); die();
 
-        // dd($question);
-
-        if ($questionNumber == $totalQuestions || isNull($question)) {
+        if ($questionNumber == $totalQuestions) { // } || count($question) < 1) {
             Exam::where('candidate_id', $candidate->id)->join('questions', '');
 
             $results = Exam::join('questions', 'exams.candidate_id', '=', 'questions.id')
