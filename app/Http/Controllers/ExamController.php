@@ -9,24 +9,14 @@ use App\Models\Question;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
+use function PHPUnit\Framework\isNull;
+
 class ExamController extends Controller
 {
-    // public function start(Candidate $candidate)
-    // {
-    //     $question = Question::paginate(10);
-    //     // dd($question);
-    //     $examSettings = $this->getExamSettings();
-
-    //     $questionNumber = $totalQuestions = 10;
-
-    //     $timeLimit = $examSettings['time_limit'] ?? 10; // in minutes
-    //     $endTime = Carbon::now()->addMinutes($timeLimit);
-
-    //     return view('test', compact('candidate', 'question', 'endTime', 'questionNumber', 'totalQuestions'));
-    // }
+    
     public function start(Request $request, Candidate $candidate)
     {
-        
+
         $validatedData = $request->validate([
             'name' => 'required',
             'email' => 'required|email',
@@ -37,70 +27,137 @@ class ExamController extends Controller
             $validatedData
         );
 
+        $questionNumber = $this->getTotalAnswered($candidate);
+        $totalQuestions = $this->getQuestionCount();
 
 
-        $question = Question::inRandomOrder()->take($this->getQuestionCount())->first();
+        // return view('result', compact('candidate', 'question', 'endTime', 'questionNumber', 'totalQuestions'));
+
+        // $question = Question::inRandomOrder()->take($this->getQuestionCount())->first();
+
+        // DISPLAY QUESTION
+        $question = Question::whereNotIn('id', function ($query) use ($candidate) {
+            $query->select('question_id')->from('exams')->where('candidate_id', $candidate->id);
+        })->inRandomOrder()->first();
+
         // dd($question);
+
+        if ($questionNumber == $totalQuestions || isNull($question)) {
+            Exam::where('candidate_id', $candidate->id)->join('questions', '');
+
+            $results = Exam::join('questions', 'exams.candidate_id', '=', 'questions.id')
+                ->get(['questions.correct_answer', 'exams.*']);
+
+            $correctAnswers = 0;
+            $answered = count($results);
+            // $totalQuestions = $this->getQuestionCount();
+            foreach ($results as $result) {
+                if ($result->selected_answer == $result->correct_answer)
+                    $correctAnswers++;
+            }
+            $percentageScore = ($correctAnswers / $totalQuestions) * 100;
+            $wrongAnswers = $totalQuestions - $correctAnswers;
+            $unansweredQuestions = $totalQuestions - $answered;
+            return view('result', compact('candidate', 'answered', 'percentageScore', 'totalQuestions', 'correctAnswers', 'wrongAnswers', 'unansweredQuestions'));
+        }
+
         $examSettings = $this->getExamSettings();
 
-        $questionNumber = $totalQuestions = 10;
+
 
         $timeLimit = $examSettings['time_limit'] ?? 10; // in minutes
         $endTime = Carbon::now()->addMinutes($timeLimit);
 
         return view('test', compact('candidate', 'question', 'endTime', 'questionNumber', 'totalQuestions'));
     }
-/*
-    public function startTest(Request $request)
-    {
-        $name = $request->input('name');
-        $email = $request->input('email');
 
-        $questions = Question::inRandomOrder()->limit(10)->get();
-        $negative_score = ExamSetting::where('key', 'negative_score')->first()->value;
 
-        $time_limit = ExamSetting::where('key', 'time_limit')->first()->value;
-        $time_remaining = $time_limit * 60;
-
-        $candidate = Candidate::create([
-            'name' => $name,
-            'email' => $email
-        ]);
-
-        foreach ($questions as $question) {
-            $candidate_answer = CandidateAnswer::create([
-                'candidate_id' => $candidate->id,
-                'question_id' => $question->id,
-                'selected_option' => null
-            ]);
-        }
-
-        return view('test', compact('questions', 'time_remaining', 'negative_score', 'candidate'));
-    }*/
-
+    // SAVE ANSWER
     public function answer(Request $request)
     {
         $name = $request->input('name');
         $answer = $request->input('answer');
-        // foreach ($questions as $question) {
-            $candidate_answer = Exam::create([
+
+
+        $candidate_answer = Exam::updateOrCreate( // So that user can change his answer
+            [
+                'candidate_id' => $request->candidate_id,
+                'question_id' => $request->question_id,
+            ],
+            [
                 'candidate_id' => $request->candidate_id,
                 'question_id' => $request->question_id,
                 'selected_answer' => $request->answer,
                 'is_correct' => 1 //$request->is_correct,
-            ]);
-        // }
+            ]
+        );
+
+
+
         $candidate = Candidate::find($request->candidate_id);
-        $question = Question::inRandomOrder()->take($this->getQuestionCount())->first();
+        // $question = Question::inRandomOrder()->take($this->getQuestionCount())->first();
         // dd($question);
+
+
+        $question = Question::whereNotIn('id', function ($query) use ($candidate) {
+            $query->select('question_id')->from('exams')->where('candidate_id', $candidate->id);
+        })->inRandomOrder()->first();
+
         $examSettings = $this->getExamSettings();
 
-        $questionNumber = $totalQuestions = 10;
+        $questionNumber = $this->getTotalAnswered($candidate);
+        $totalQuestions = $this->getQuestionCount();
+
+        if ($questionNumber == $totalQuestions || empty($question)) {
+            // $this->getResult($candidate);
+            // return view('result', compact('candidate', 'answered', 'percentageScore', 'totalQuestions', 'correctAnswers', 'wrongAnswers', 'unansweredQuestions'));
+            Exam::where('candidate_id', $candidate->id)->join('questions', '');
+
+            $results = Exam::join('questions', 'exams.candidate_id', '=', 'questions.id')
+                ->get(['questions.correct_answer', 'exams.*']);
+
+            $correctAnswers = 0;
+            $answered = count($results);
+            // $totalQuestions = $this->getQuestionCount();
+            foreach ($results as $result) {
+                if ($result->selected_answer == $result->correct_answer)
+                    $correctAnswers++;
+                echo "<br>";
+            }
+            $percentageScore = ($correctAnswers / $totalQuestions) * 100;
+            $wrongAnswers = $totalQuestions - $correctAnswers;
+            $unansweredQuestions = $totalQuestions - $answered;
+            return view('result', compact('candidate', 'answered', 'percentageScore', 'totalQuestions', 'correctAnswers', 'wrongAnswers', 'unansweredQuestions'));
+        }
+
+        // return view('result', compact('candidate', 'question', 'endTime', 'questionNumber', 'totalQuestions'));
 
         $timeLimit = $examSettings['time_limit'] ?? 10; // in minutes
         $endTime = Carbon::now()->addMinutes($timeLimit);
 
         return view('test', compact('candidate', 'question', 'endTime', 'questionNumber', 'totalQuestions'));
+    }
+
+
+    public function getResult($candidate)
+    {
+        Exam::where('candidate_id', $candidate->id)->join('questions', '');
+
+        $results = Exam::join('questions', 'exams.candidate_id', '=', 'questions.id')
+            ->get(['questions.correct_answer', 'exams.*']);
+
+        $correctAnswers = 0;
+        $answered = count($results);
+        $totalQuestions = $this->getQuestionCount();
+        foreach ($results as $result) {
+            if ($result->selected_answer == $result->correct_answer)
+                $correctAnswers++;
+            echo "<br>";
+        }
+        $percentageScore = ($correctAnswers / $totalQuestions) * 100;
+        $wrongAnswers = $totalQuestions - $correctAnswers;
+        $unansweredQuestions = $totalQuestions - $answered;
+        // return view('result', compact('candidate', 'answered', 'percentageScore', 'totalQuestions', 'correctAnswers', 'wrongAnswers', 'unansweredQuestions'));
     }
 
 
@@ -127,8 +184,13 @@ class ExamController extends Controller
 
     private function getQuestionCount()
     {
-        $questionCount = $this->getExamSettings()['question_count'] ?? 10;
-        return min(max($questionCount, 1), 50); // limit between 1 and 50
+        return  $questionCount = $this->getExamSettings()['question_count'] ?? 10;
+        // return min(max($questionCount, 1), 50); // limit between 1 and 50
+    }
+
+    public function getTotalAnswered($candidate)
+    {
+        return Exam::where('candidate_id', $candidate->id)->count();
     }
 
     private function getExamSettings()
