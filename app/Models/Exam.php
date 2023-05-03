@@ -13,6 +13,7 @@ class Exam extends Model
         'question_id',
         'selected_answer',
         'is_correct',
+        'time_remain'
     ];
 
     public function candidate()

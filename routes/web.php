@@ -24,8 +24,12 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 Route::get('/exam', [ExamController::class, 'index']);
 Route::post('/exam/start/', [ExamController::class, 'start'])->name('start.exam');
-Route::get('/exam/question/{id}', [ExamController::class, 'question'])->name('exam.question');
+// Route::post('/exam/question', [ExamController::class, 'question'])->name('exam.question');
+Route::get('/exam/{candidate}/{question}', [ExamController::class, 'previous'])->name('exam.previous');
 Route::post('/exam/answer', [ExamController::class, 'answer'])->name('exam.answer');
-Route::get('/exam/result', [ExamController::class, 'result'])->name('exam.result');
-Route::get('/exam/finish', [ExamController::class, 'finish'])->name('exam.finish');
-Route::get('/exam/reopen', [ExamController::class, 'reopen'])->name('exam.reopen');
+Route::post('/exam/updateTimeRemaining', [ExamController::class, 'updateTimeRemaining'])->name('exam.updateTimeRemaining');
+
+
+// Route::get('/exam/result', [ExamController::class, 'result'])->name('exam.result');
+// Route::get('/exam/finish', [ExamController::class, 'finish'])->name('exam.finish');
+// Route::get('/exam/reopen', [ExamController::class, 'reopen'])->name('exam.reopen');
