@@ -246,7 +246,7 @@ class ExamController extends Controller
     private function getTimeRemaining($candidate)
     {
 
-        return Exam::where('candidate_id', $candidate)->first()->time_remain;
+        return Exam::where('candidate_id', $candidate)->first()->time_remain ?? ($examSettings['time_limit'] ?? 10) * 60;
     }
     public function updateTimeRemaining(Request $request)
     {

@@ -108,7 +108,9 @@
         $("#finish-test").click(function() {
             if(confirm("Are you sure you want to finish the test? Note that you may not take this test again If any questions are remaing to answer.")) {
                 clearInterval(timer);
-                update_time(0);
+                duration = 0;
+                update_time(-1);
+                document.getElementById("exam-form").submit();
             }
 
         });
