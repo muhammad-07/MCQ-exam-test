@@ -7,7 +7,7 @@
         <h1>MCQ Exam <span class="float-right" id="timer"></span></h1>
         <hr>
 
-        <strong>Question {{ $questionNumber }} of {{ $totalQuestions }}</strong><br>
+        <strong>Question(s) answered {{ $questionNumber }} of {{ $totalQuestions }}</strong><br>
         {{-- <div class="progress">
             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
                 aria-valuenow="{{ ($questionNumber * $totalQuestions) / 100 }}" aria-valuemin="0" aria-valuemax="100"
@@ -45,7 +45,7 @@
             </div>
 
             @if ($question->id > 1)
-            <a type="button" id="previous" class="btn btn-primary" href="/exam/1/{{ $question->id - 1}}">Previous</a>
+            <a type="button" id="previous" class="btn btn-primary" href="/exam/{{ $candidate->id}}/{{ $question->id - 1}}">Previous</a>
             @endif
 
             <button type="submit" class="btn btn-primary">Next</button>

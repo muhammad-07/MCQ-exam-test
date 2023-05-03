@@ -94,56 +94,7 @@ class ExamController extends Controller
 
 
 
-        // return response()->json(array('msg'=> $question), 200);
-        // return ($request);
 
-        //  Candidate::firstOrCreate(
-        //     $validatedData
-        // );
-
-        // $questionNumber = $this->getTotalAnswered($candidate);
-        // $totalQuestions = $this->getQuestionCount();
-        // $timeRemain     = $this->getTimeRemaining($candidate->id);
-
-
-        // // return view('result', compact('candidate', 'question', 'endTime', 'questionNumber', 'totalQuestions'));
-
-        // // $question = Question::inRandomOrder()->take($this->getQuestionCount())->first();
-
-        // // DISPLAY QUESTION
-        // $question = Question::whereNotIn('id', function ($query) use ($candidate) {
-        //     $query->select('question_id')->from('exams')->where('candidate_id', $candidate->id);
-        // })->first();
-        // // ->inRandomOrder()
-
-
-        // if ($questionNumber == $totalQuestions || $timeRemain < 3) { // } || count($question) < 1) {
-        //     Exam::where('candidate_id', $candidate->id)->join('questions', '');
-
-        //     $results = Exam::join('questions', 'exams.candidate_id', '=', 'questions.id')
-        //         ->get(['questions.correct_answer', 'exams.*']);
-
-        //     $correctAnswers = 0;
-        //     $answered = count($results);
-        //     // $totalQuestions = $this->getQuestionCount();
-        //     foreach ($results as $result) {
-        //         if ($result->selected_answer == $result->correct_answer)
-        //             $correctAnswers++;
-        //     }
-        //     $percentageScore = ($correctAnswers / $totalQuestions) * 100;
-        //     $unansweredQuestions = $totalQuestions - $answered;
-        //     $wrongAnswers = $totalQuestions - $correctAnswers - $unansweredQuestions;
-
-        //     return view('result', compact('candidate', 'answered', 'percentageScore', 'totalQuestions', 'correctAnswers', 'wrongAnswers', 'unansweredQuestions'));
-        // }
-
-        // $examSettings = $this->getExamSettings();
-
-
-
-        // $endTime = $timeRemain ?? ($examSettings['time_limit'] ?? 10) * 60;
-
-        // return view('test', compact('candidate', 'question', 'endTime', 'questionNumber', 'totalQuestions'));
     }
 
 
@@ -154,10 +105,9 @@ class ExamController extends Controller
         $answer = $request->input('answer');
 
         $examSettings   = $this->getExamSettings();
-        $questionNumber = $this->getTotalAnswered($candidate);
         $totalQuestions = $this->getQuestionCount();
         $timeRemain     = $this->getTimeRemaining($candidate->id);
-
+        $questionNumber = $this->getTotalAnswered($candidate) + 1;
 
         if ($this->getQuestionCount() > $this->getTotalAnswered($candidate)) {
 
