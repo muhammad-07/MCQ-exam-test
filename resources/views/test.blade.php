@@ -25,22 +25,26 @@
             </div>
 
             <div class="form-check">
-                <input type="radio" class="form-check-input" name="answer" value="1" required>
+                <input {{ $selected_answer && $selected_answer == 1 ? "checked='chedked'" : '' }} type="radio"
+                    class="form-check-input" name="answer" value="1" required>
                 <label class="form-check-label">{{ $question->option_1 }}</label>
             </div>
 
             <div class="form-check">
-                <input type="radio" class="form-check-input" name="answer" value="2" required>
+                <input {{ $selected_answer && $selected_answer == 2 ? "checked='chedked'" : '' }} type="radio"
+                    class="form-check-input" name="answer" value="2" required>
                 <label class="form-check-label">{{ $question->option_2 }}</label>
             </div>
 
             <div class="form-check">
-                <input type="radio" class="form-check-input" name="answer" value="3" required>
+                <input {{ $selected_answer && $selected_answer == 3 ? "checked='chedked'" : '' }} type="radio"
+                    class="form-check-input" name="answer" value="3" required>
                 <label class="form-check-label">{{ $question->option_3 }}</label>
             </div>
 
             <div class="form-check">
-                <input type="radio" class="form-check-input" name="answer" value="4" required>
+                <input {{ $selected_answer && $selected_answer == 4 ? "checked='chedked'" : '' }} type="radio"
+                    class="form-check-input" name="answer" value="4" required>
                 <label class="form-check-label">{{ $question->option_4 }}</label>
             </div>
 
