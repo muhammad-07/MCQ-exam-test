@@ -30,6 +30,6 @@ Route::post('/exam/answer', [ExamController::class, 'answer'])->name('exam.answe
 Route::post('/exam/updateTimeRemaining', [ExamController::class, 'updateTimeRemaining'])->name('exam.updateTimeRemaining');
 
 
-// Route::get('/exam/result', [ExamController::class, 'result'])->name('exam.result');
+Route::post('/exam/getTimeRemaining', [ExamController::class, 'getTimeRemainingAjax'])->name('exam.getTimeRemaining');
 // Route::get('/exam/finish', [ExamController::class, 'finish'])->name('exam.finish');
 // Route::get('/exam/reopen', [ExamController::class, 'reopen'])->name('exam.reopen');

@@ -77,6 +77,8 @@ class ExamController extends Controller
         $candidate = Candidate::find($candidate);
         $question  = Question::find($question);
 
+        $selected_answer = Exam::where('question_id', $question->id)->first()->selected_answer;
+
         if(empty($candidate) || empty($question))
             die("This question or candidate may have deleted.");
 
@@ -90,7 +92,7 @@ class ExamController extends Controller
 
         $endTime = $timeRemain ?? ($examSettings['time_limit'] ?? 10) * 60;
 
-        return view('test', compact('candidate', 'question', 'endTime', 'questionNumber', 'totalQuestions'));
+        return view('test', compact('candidate', 'question', 'endTime', 'questionNumber', 'totalQuestions', 'selected_answer'));
 
 
 

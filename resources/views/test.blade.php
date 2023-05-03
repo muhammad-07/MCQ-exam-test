@@ -23,7 +23,7 @@
             <div class="form-group">
                 <label for="question">{{ $question->question }}</label>
             </div>
-
+            @php $selected_answer = $selected_answer ?? null @endphp
             <div class="form-check">
                 <input {{ $selected_answer && $selected_answer == 1 ? "checked='chedked'" : '' }} type="radio"
                     class="form-check-input" name="answer" value="1" required>
