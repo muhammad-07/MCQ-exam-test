@@ -13,8 +13,11 @@ class ExamSettingFactory extends Factory
      */
     public function definition()
     {
-        return [
-            //
-        ];
+        // return [
+        //     'name' => 'negative',
+        //     'value' => 0.5,
+        // ];
+
+
     }
 }

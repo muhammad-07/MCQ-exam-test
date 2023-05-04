@@ -11,11 +11,11 @@ class ExamSetting extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'key', 'value'
+        'name', 'value'
     ];
 
     public function getTimeLimitAttribute()
     {
-        return $this->where('key', 'time_limit')->first()->value;
+        return $this->where('name', 'time_limit')->first()->value;
     }
 }

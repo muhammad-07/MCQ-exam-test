@@ -7,6 +7,7 @@ use App\Models\Exam;
 use App\Models\ExamSetting;
 use App\Models\Question;
 use Carbon\Carbon;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 
 use function PHPUnit\Framework\isNull;
@@ -30,6 +31,7 @@ class ExamController extends Controller
         $questionNumber = $this->getTotalAnswered($candidate);
         $totalQuestions = $this->getQuestionCount();
         $timeRemain     = $this->getTimeRemaining($candidate->id);
+        $examSettings = $this->getExamSettings();
 
 
         // return view('result', compact('candidate', 'question', 'endTime', 'questionNumber', 'totalQuestions'));
@@ -43,27 +45,45 @@ class ExamController extends Controller
         // ->inRandomOrder()
 
 
-        if ($questionNumber == $totalQuestions || $timeRemain < 3) { // } || count($question) < 1) {
-            Exam::where('candidate_id', $candidate->id)->join('questions', '');
+        if ($questionNumber == $totalQuestions || $timeRemain < 3 || empty($question)) {
 
-            $results = Exam::join('questions', 'exams.candidate_id', '=', 'questions.id')
-                ->get(['questions.correct_answer', 'exams.*']);
+            // $results = Exam::join('questions', 'exams.question_id', '=', 'questions.id')
+            //     ->where('exams.candidate_id', $candidate->id)
+            //     ->get(['questions.correct_answer', 'exams.*']);
+            // leftjoin('exams', 'exams.question_id', '=', 'questions.id')
 
-            $correctAnswers = 0;
-            $answered = count($results);
-            // $totalQuestions = $this->getQuestionCount();
+            // foreach ($results as $result) {
+            //     if ($result->selected_answer != null)
+            //         echo $result->question;
+            // }
+
+            $results = Question::leftjoin('exams', function (JoinClause $join) use ($candidate) {
+                $join->on('exams.question_id', '=', 'questions.id')->where('exams.candidate_id', $candidate->id);
+            })->get(['exams.selected_answer', 'questions.*']);
+
+            // dd($results->whereNotNull('selected_answer')->count());
+
+            $correctAnswers = $score = 0;
+            $answered = $results->whereNotNull('selected_answer')->count();
+
             foreach ($results as $result) {
-                if ($result->selected_answer == $result->correct_answer)
+                if ($result->selected_answer == $result->correct_answer) {
                     $correctAnswers++;
+                    $score++;
+                }
+                elseif($result->selected_answer == "") {
+                    $score += 0;
+                } else {
+                    $score += (1 - $examSettings['negative']);
+                }
             }
-            $percentageScore = ($correctAnswers / $totalQuestions) * 100;
+            $percentageScore = ($score / $totalQuestions) * 100;
             $unansweredQuestions = $totalQuestions - $answered;
             $wrongAnswers = $totalQuestions - $correctAnswers - $unansweredQuestions;
-
             return view('result', compact('candidate', 'answered', 'percentageScore', 'totalQuestions', 'correctAnswers', 'wrongAnswers', 'unansweredQuestions'));
         }
 
-        $examSettings = $this->getExamSettings();
+
 
 
 
@@ -72,14 +92,14 @@ class ExamController extends Controller
         return view('test', compact('candidate', 'question', 'endTime', 'questionNumber', 'totalQuestions'));
     }
 
-    public function previous( $candidate, $question)
+    public function previous($candidate, $question)
     {
         $candidate = Candidate::find($candidate);
         $question  = Question::find($question);
 
         $selected_answer = Exam::where('question_id', $question->id)->first()->selected_answer;
 
-        if(empty($candidate) || empty($question))
+        if (empty($candidate) || empty($question))
             die("This question or candidate may have deleted.");
 
         $questionNumber = $this->getTotalAnswered($candidate);
@@ -93,10 +113,6 @@ class ExamController extends Controller
         $endTime = $timeRemain ?? ($examSettings['time_limit'] ?? 10) * 60;
 
         return view('test', compact('candidate', 'question', 'endTime', 'questionNumber', 'totalQuestions', 'selected_answer'));
-
-
-
-
     }
 
 
@@ -146,22 +162,38 @@ class ExamController extends Controller
 
 
         if ($questionNumber == $totalQuestions || $timeRemain < 3 || empty($question)) {
-            // $this->getResult($candidate);
-            // return view('result', compact('candidate', 'answered', 'percentageScore', 'totalQuestions', 'correctAnswers', 'wrongAnswers', 'unansweredQuestions'));
-            Exam::where('candidate_id', $candidate->id)->join('questions', '');
 
-            $results = Exam::join('questions', 'exams.candidate_id', '=', 'questions.id')
-                ->get(['questions.correct_answer', 'exams.*']);
+            // $results = Exam::join('questions', 'exams.question_id', '=', 'questions.id')
+            //     ->where('exams.candidate_id', $candidate->id)
+            //     ->get(['questions.correct_answer', 'exams.*']);
+            // leftjoin('exams', 'exams.question_id', '=', 'questions.id')
 
-            $correctAnswers = 0;
-            $answered = count($results);
-            // $totalQuestions = $this->getQuestionCount();
+            // foreach ($results as $result) {
+            //     if ($result->selected_answer != null)
+            //         echo $result->question;
+            // }
+
+            $results = Question::leftjoin('exams', function (JoinClause $join) use ($candidate) {
+                $join->on('exams.question_id', '=', 'questions.id')->where('exams.candidate_id', $candidate->id);
+            })->get(['exams.selected_answer', 'questions.*']);
+
+            // dd($results->whereNotNull('selected_answer')->count());
+
+            $correctAnswers = $score = 0;
+            $answered = $results->whereNotNull('selected_answer')->count();
+
             foreach ($results as $result) {
-                if ($result->selected_answer == $result->correct_answer)
+                if ($result->selected_answer == $result->correct_answer) {
                     $correctAnswers++;
-                // echo "<br>";
+                    $score++;
+                }
+                elseif($result->selected_answer == "") {
+                    $score += 0;
+                } else {
+                    $score += (1 - $examSettings['negative']);
+                }
             }
-            $percentageScore = ($correctAnswers / $totalQuestions) * 100;
+            $percentageScore = ($score / $totalQuestions) * 100;
             $unansweredQuestions = $totalQuestions - $answered;
             $wrongAnswers = $totalQuestions - $correctAnswers - $unansweredQuestions;
             return view('result', compact('candidate', 'answered', 'percentageScore', 'totalQuestions', 'correctAnswers', 'wrongAnswers', 'unansweredQuestions'));
@@ -197,7 +229,7 @@ class ExamController extends Controller
     }
     private function getTimeRemaining($candidate)
     {
-
+        $examSettings = $this->getExamSettings();
         return Exam::where('candidate_id', $candidate)->first()->time_remain ?? ($examSettings['time_limit'] ?? 10) * 60;
     }
     public function updateTimeRemaining(Request $request)
